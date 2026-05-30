@@ -190,40 +190,20 @@ TestThermalModel      4/4  — loss_iron_W, loss_copper_W, temperature_K, tags
 
 ---
 
-## Corpus Enrichment — Before vs After
-
-Enriching all 6 example models with named Outport blocks, signal labels, and block descriptions produced measurable improvements:
-
-| Metric | Before | After |
-|---|---|---|
-| Total indexed ports | 14 | **51** |
-| Ports canonicalized | ~60% | **100%** |
-| `compatible_with` graph edges | 96 | **144** (+50%) |
-| "PMSM thermal" #1 result | PMSM_avg | **MotorThermal11Node** |
-| "induction motor FOC" #1 result | PMSM_avg | **FEM_IM_FOC_MA** |
-
-What was added to each model in Simulink:
-
-| Model | Added Outport blocks | Key signal labels |
-|---|---|---|
-| `MotorThermal11Node` | `temperature_vector_K` | `loss_copper_end_winding_W`, `T_airgap_K`, `T_frame_K`, 14 more |
-| `PMSM_FEM` / `PMSM_avg` | `temperature_winding_K`, `speed_cmd_rads` | `id_ref_A`, `iq_ref_A`, `speed_ref_rpm` |
-| `FOCController` | `temperature_winding_K`, `speed_ref_rads` | `speed_ref_rads`, `torque_ref_Nm`, `omega_elec_rads` |
-| `FEM_IM` | `ia_A`, `ib_A`, `ic_A` *(was 0 ports)* | 3-phase current labels |
-| `FEM_IM_FOC_MA` | `iabc_A`, `isd_A`, `isq_A`, `omega_shaft_rads`, `torque_ref_Nm` | `field_angle_rad`, `vabc_V`, `id_ref_A`, `iq_ref_A` |
-
----
-
 ## Sample Corpus
 
-| File | Represents | Indexed ports | Fidelity pair |
-|---|---|---|---|
-| `PMSM_FEM.slx` | FEM PMSM test harness | `temperature_winding_K`, `speed_cmd_rads`, `torque_shaft_Nm` | Pair A (detailed) |
-| `PMSM_avg.slx` | Averaged PMSM test harness | same as FEM | Pair A (simplified) |
-| `MotorThermal11Node.slx` | 11-node RC thermal model | 6× loss inputs + 11× temp outputs + `temperature_vector_K` | — |
-| `FOCController.slx` | FOC closed-loop drive | `temperature_winding_K`, `speed_ref_rads`, `torque_ref_Nm` | — |
-| `FEM_IM.slx` | Induction machine (FEM) | `ia_A`, `ib_A`, `ic_A` | — |
-| `FEM_IM_FOC_MA.slx` | Agent-built IM FOC model | `iabc_A`, `isd_A`, `isq_A`, `omega_shaft_rads`, `torque_ref_Nm` | Meta-test (T9) |
+Drop your `.slx` files into `examples/pmsm_drive/`, tag them, and index. A well-rounded corpus for an IPMSM drive system includes:
+
+| Type | What it represents | Key ports to expose |
+|---|---|---|
+| FEM motor (detailed) | High-fidelity electromagnetic model | `omega_shaft_rads`, `torque_shaft_Nm`, `loss_copper_W`, `loss_iron_W` |
+| Averaged motor (simplified) | Same machine, reduced order | same as FEM — enables fidelity swap |
+| 11-node thermal model | RC thermal network | `loss_copper_W` + `loss_iron_W` inputs, `temperature_K` outputs |
+| FOC controller | Closed-loop drive | `omega_shaft_rads`, `id_ref_A`, `iq_ref_A` |
+| Induction machine | Different machine type | `iabc_A`, `omega_shaft_rads` |
+| Agent-built model | Any model built in a prior session | whatever ports that session exposed |
+
+The last row is the meta-test: every model an agent builds should be immediately re-indexed so future agents can reuse it.
 
 ---
 

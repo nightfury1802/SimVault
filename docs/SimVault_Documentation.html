@@ -145,7 +145,6 @@
   <div class="section-label">Reference</div>
   <a href="#schema">JSON Schema</a>
   <a href="#canonical-names">Canonical Names</a>
-  <a href="#enrichment">Corpus Enrichment</a>
   <a href="#signal-guide">Signal Naming Guide</a>
   <a href="#mcp-tools">MCP Tool Reference</a>
 
@@ -588,45 +587,14 @@ result = query(
   <tr><td>W</td><td>kW</td><td>0.001</td><td><span class="badge badge-warn">WARN</span></td></tr>
 </table>
 
-<!-- ─── Corpus Enrichment ─────────────────────────────────────────── -->
-<h2 id="enrichment">Corpus Enrichment — Empirical Results</h2>
-
-<p>Enriching the 6 example models with named Outport blocks, signal labels, and block descriptions produced measurable, direct improvements across all metrics:</p>
-
-<table>
-  <tr><th>Metric</th><th>Before enrichment</th><th>After enrichment</th></tr>
-  <tr><td>Total indexed ports</td><td>14</td><td><strong>51</strong></td></tr>
-  <tr><td>Ports canonicalized</td><td>~60%</td><td><strong>100%</strong></td></tr>
-  <tr><td><code>compatible_with</code> graph edges</td><td>96</td><td><strong>144</strong> (+50%)</td></tr>
-  <tr><td>"PMSM thermal" top result</td><td>PMSM_avg</td><td><strong>MotorThermal11Node</strong> ✓</td></tr>
-  <tr><td>"induction motor FOC" top result</td><td>PMSM_avg</td><td><strong>FEM_IM_FOC_MA</strong> ✓</td></tr>
-  <tr><td>Valid assembly wires per query</td><td>48</td><td><strong>72</strong></td></tr>
-</table>
-
-<h3>What was added to each model</h3>
-
-<table>
-  <tr><th>Model</th><th>Outports added</th><th>Signal labels added</th></tr>
-  <tr><td><code>MotorThermal11Node</code></td><td><code>temperature_vector_K</code></td><td><code>loss_copper_end_winding_W</code>, <code>T_airgap_K</code>, <code>T_frame_K</code>, 14 more</td></tr>
-  <tr><td><code>PMSM_FEM</code> / <code>PMSM_avg</code></td><td><code>temperature_winding_K</code>, <code>speed_cmd_rads</code></td><td><code>id_ref_A</code>, <code>iq_ref_A</code>, <code>speed_ref_rpm</code></td></tr>
-  <tr><td><code>FOCController</code></td><td><code>temperature_winding_K</code>, <code>speed_ref_rads</code></td><td><code>speed_ref_rads</code>, <code>torque_ref_Nm</code>, <code>omega_elec_rads</code></td></tr>
-  <tr><td><code>FEM_IM</code></td><td><code>ia_A</code>, <code>ib_A</code>, <code>ic_A</code> <em>(was 0 ports)</em></td><td>3-phase current labels on Probe outputs</td></tr>
-  <tr><td><code>FEM_IM_FOC_MA</code></td><td><code>iabc_A</code>, <code>isd_A</code>, <code>isq_A</code>, <code>omega_shaft_rads</code>, <code>torque_ref_Nm</code></td><td><code>field_angle_rad</code>, <code>vabc_V</code>, <code>id_ref_A</code>, <code>iq_ref_A</code></td></tr>
-</table>
-
-<div class="callout callout-tip">
-  <div class="callout-title">Takeaway</div>
-  Named Outport blocks and signal labels are the single highest-leverage improvement you can make to a model before indexing it. <strong>FEM_IM went from 0 indexed ports to 3</strong> just by adding Outport blocks to the Probe outputs.
-</div>
-
 <!-- ─── Signal naming guide ─────────────────────────────────────── -->
 <h2 id="signal-guide">Signal Naming Guide — Getting the Best from SimVault</h2>
 
 <p>The canonicalizer matches on port names. The better your model's port names, the richer the graph and the more accurate the assembly context. This is the highest-leverage improvement you can make to your corpus.</p>
 
 <div class="callout callout-tip">
-  <div class="callout-title">Key insight — validated empirically</div>
-  Every named Inport/Outport block becomes a port in the graph. Every graph port can generate <code>compatible_with</code> edges. More named ports → more edges → better agent assembly. Enriching 6 models increased <code>compatible_with</code> edges by 50% and corrected query ranking for both thermal and induction motor searches.
+  <div class="callout-title">Key insight</div>
+  Every named Inport/Outport block becomes a port in the graph. Every graph port can generate <code>compatible_with</code> edges. More named ports → more edges → better agent assembly. A model with unnamed ports contributes nothing to cross-model compatibility.
 </div>
 
 <h3>Recommended practices</h3>
