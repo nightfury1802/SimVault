@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+.eggs/
+dist/
+build/
+.venv/
+venv/
+
+# SimVault generated artifacts (rebuild with `simvault index`)
+.svdb/
+extracted/
+kb/
+simvault.graph.json
+simvault.lock.json
+
+# Editor / OS
+.DS_Store
+.vscode/
+*.swp
+*.swo
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Example .slx files (large binaries — symlink or copy locally)
+examples/pmsm_drive/*.slx

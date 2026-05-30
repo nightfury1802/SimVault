@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SimVault — Technical Documentation</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --border: #2a2d3e;
+    --accent: #5b6af0;
+    --accent2: #3ecfcf;
+    --accent3: #f06b5b;
+    --green: #3ecf8e;
+    --yellow: #f0c45b;
+    --red: #f06b5b;
+    --text: #e2e8f0;
+    --muted: #8892a4;
+    --code-bg: #13151f;
+    --radius: 8px;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, 'Segoe UI', sans-serif; line-height: 1.65; }
+
+  /* Layout */
+  .layout { display: flex; min-height: 100vh; }
+  nav { width: 260px; min-width: 260px; background: var(--surface); border-right: 1px solid var(--border); padding: 2rem 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  main { flex: 1; max-width: 900px; padding: 3rem 4rem; overflow-x: hidden; }
+
+  /* Nav */
+  .nav-logo { padding: 0 1.5rem 1.5rem; border-bottom: 1px solid var(--border); margin-bottom: 1rem; }
+  .nav-logo h1 { font-size: 1.3rem; font-weight: 700; color: var(--accent); }
+  .nav-logo p { font-size: 0.75rem; color: var(--muted); margin-top: 0.2rem; }
+  nav a { display: block; padding: 0.35rem 1.5rem; font-size: 0.85rem; color: var(--muted); text-decoration: none; border-left: 3px solid transparent; transition: all 0.15s; }
+  nav a:hover { color: var(--text); border-left-color: var(--accent); background: rgba(91,106,240,0.06); }
+  nav .section-label { padding: 1rem 1.5rem 0.3rem; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+
+  /* Typography */
+  h1 { font-size: 2.2rem; font-weight: 800; margin-bottom: 0.5rem; }
+  h2 { font-size: 1.5rem; font-weight: 700; margin-top: 3rem; margin-bottom: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); color: var(--accent); }
+  h3 { font-size: 1.1rem; font-weight: 600; margin-top: 2rem; margin-bottom: 0.75rem; color: var(--accent2); }
+  h4 { font-size: 0.95rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.5rem; color: var(--text); }
+  p { margin-bottom: 1rem; color: var(--text); }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  ul, ol { margin: 0.75rem 0 1rem 1.5rem; }
+  li { margin-bottom: 0.35rem; }
+  strong { color: #fff; font-weight: 600; }
+  .muted { color: var(--muted); font-size: 0.9rem; }
+
+  /* Hero */
+  .hero { background: linear-gradient(135deg, #1a1d27 0%, #151926 100%); border: 1px solid var(--border); border-radius: var(--radius); padding: 2.5rem; margin-bottom: 2rem; }
+  .hero h1 { background: linear-gradient(90deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .hero p { color: var(--muted); font-size: 1.05rem; max-width: 600px; }
+  .stats { display: flex; gap: 2rem; margin-top: 1.5rem; flex-wrap: wrap; }
+  .stat { text-align: center; }
+  .stat-val { font-size: 2rem; font-weight: 800; color: var(--accent2); line-height: 1; }
+  .stat-lbl { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.2rem; }
+
+  /* Code */
+  pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; overflow-x: auto; margin: 1rem 0; font-family: var(--font-mono); font-size: 0.82rem; line-height: 1.6; }
+  code { font-family: var(--font-mono); font-size: 0.85em; background: var(--code-bg); padding: 0.15em 0.4em; border-radius: 4px; color: var(--accent2); }
+  pre code { background: none; padding: 0; color: var(--text); font-size: inherit; }
+  .comment { color: #5c6680; }
+  .kw { color: #c678dd; }
+  .str { color: #98c379; }
+  .num { color: #d19a66; }
+  .fn { color: #61afef; }
+  .cls { color: #e5c07b; }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.88rem; }
+  th { background: var(--surface); color: var(--accent); font-weight: 600; padding: 0.6rem 1rem; text-align: left; border-bottom: 1px solid var(--border); }
+  td { padding: 0.55rem 1rem; border-bottom: 1px solid rgba(42,45,62,0.6); vertical-align: top; }
+  tr:hover td { background: rgba(91,106,240,0.04); }
+
+  /* Badges */
+  .badge { display: inline-block; font-size: 0.72rem; font-weight: 600; padding: 0.2em 0.65em; border-radius: 999px; }
+  .badge-pass   { background: rgba(62,207,142,0.15); color: var(--green); }
+  .badge-warn   { background: rgba(240,196,91,0.15); color: var(--yellow); }
+  .badge-block  { background: rgba(240,107,91,0.15); color: var(--red); }
+  .badge-blue   { background: rgba(91,106,240,0.15); color: var(--accent); }
+  .badge-cyan   { background: rgba(62,207,207,0.15); color: var(--accent2); }
+
+  /* Cards */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; margin: 1rem 0; }
+  .card h4 { margin-top: 0; }
+  .card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+  @media (max-width: 700px) { .card-grid { grid-template-columns: 1fr; } }
+
+  /* Pipeline diagram */
+  .pipeline { display: flex; flex-direction: column; gap: 0; margin: 1.5rem 0; }
+  .pipe-node { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.9rem 1.25rem; display: flex; align-items: center; gap: 1rem; }
+  .pipe-node:not(:last-child)::after { content: '↓'; color: var(--muted); display: block; text-align: center; padding: 0.2rem 0; font-size: 1.1rem; }
+  .pipe-icon { font-size: 1.4rem; min-width: 2rem; text-align: center; }
+  .pipe-name { font-weight: 600; font-size: 0.9rem; color: var(--text); }
+  .pipe-desc { font-size: 0.8rem; color: var(--muted); }
+  .pipe-lang { margin-left: auto; }
+
+  /* Test matrix */
+  .test-pass { color: var(--green); font-weight: 600; }
+  .test-warn { color: var(--yellow); font-weight: 600; }
+  .test-block { color: var(--red); font-weight: 600; }
+
+  /* Callouts */
+  .callout { border-left: 3px solid; border-radius: 0 var(--radius) var(--radius) 0; padding: 0.9rem 1.25rem; margin: 1.25rem 0; }
+  .callout-tip  { border-color: var(--green); background: rgba(62,207,142,0.06); }
+  .callout-warn { border-color: var(--yellow); background: rgba(240,196,91,0.06); }
+  .callout-info { border-color: var(--accent); background: rgba(91,106,240,0.06); }
+  .callout-title { font-weight: 700; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.4rem; }
+  .callout-tip  .callout-title { color: var(--green); }
+  .callout-warn .callout-title { color: var(--yellow); }
+  .callout-info .callout-title { color: var(--accent); }
+
+  /* Section anchors */
+  h2[id], h3[id] { scroll-margin-top: 2rem; }
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- ─── Navigation ─────────────────────────────────────────────── -->
+<nav>
+  <div class="nav-logo">
+    <h1>SimVault</h1>
+    <p>v0.1.0 · Phase 1 MVP</p>
+  </div>
+  <div class="section-label">Overview</div>
+  <a href="#motivation">Motivation</a>
+  <a href="#architecture">Architecture</a>
+  <a href="#quickstart">Quick Start</a>
+
+  <div class="section-label">Components</div>
+  <a href="#parser">Parser (MATLAB)</a>
+  <a href="#canonicalizer">Canonicalizer</a>
+  <a href="#graph">Graph Builder</a>
+  <a href="#vectors">Vector Store</a>
+  <a href="#validator">Validator</a>
+  <a href="#query">Query Engine</a>
+  <a href="#mcp">MCP Server</a>
+  <a href="#cli">CLI</a>
+
+  <div class="section-label">Reference</div>
+  <a href="#schema">JSON Schema</a>
+  <a href="#canonical-names">Canonical Names</a>
+  <a href="#enrichment">Corpus Enrichment</a>
+  <a href="#signal-guide">Signal Naming Guide</a>
+  <a href="#mcp-tools">MCP Tool Reference</a>
+
+  <div class="section-label">Testing</div>
+  <a href="#tests">Integration Tests</a>
+  <a href="#test-matrix">T1–T9 Matrix</a>
+  <a href="#roadmap">Roadmap</a>
+</nav>
+
+<!-- ─── Main Content ────────────────────────────────────────────── -->
+<main>
+
+<!-- Hero -->
+<div class="hero">
+  <h1>SimVault</h1>
+  <p>A knowledge graph and semantic search engine for Simscape/Simulink component libraries — built so AI agents can assemble physically-valid models without hallucinating wires.</p>
+  <div class="stats">
+    <div class="stat"><div class="stat-val">4</div><div class="stat-lbl">MCP tools</div></div>
+    <div class="stat"><div class="stat-val">23</div><div class="stat-lbl">Tests passing</div></div>
+    <div class="stat"><div class="stat-val">144</div><div class="stat-lbl">Compatible-with edges</div></div>
+    <div class="stat"><div class="stat-val">51</div><div class="stat-lbl">Indexed ports (100% canonical)</div></div>
+  </div>
+</div>
+
+<!-- ─── Motivation ─────────────────────────────────────────────── -->
+<h2 id="motivation">Motivation</h2>
+
+<p>Every Simscape modeling session produces <code>.slx</code> files that no future agent can find or reuse. Port names are inconsistent. Domain mismatches cause silent wiring errors. Fidelity variants (FEM ↔ averaged) are invisible to a search engine. The result: every agent rebuilds from scratch, makes the same mistakes, and produces one-off artifacts that never compound.</p>
+
+<p>SimVault solves this with three interlocking mechanisms:</p>
+
+<div class="card-grid">
+  <div class="card">
+    <h4>🔍 Semantic Search</h4>
+    <p class="muted">ChromaDB + BGE embeddings find the right component by description, fidelity, and analysis type — even when port names differ.</p>
+  </div>
+  <div class="card">
+    <h4>🕸 Knowledge Graph</h4>
+    <p class="muted">NetworkX tracks which ports are compatible, which models are fidelity variants of each other, and which thermal inputs need EM sources.</p>
+  </div>
+  <div class="card">
+    <h4>⚡ Wire Validator</h4>
+    <p class="muted">PASS / WARN / BLOCK for every proposed connection — domain mismatches, unit scale errors, solver contract violations.</p>
+  </div>
+  <div class="card">
+    <h4>🤖 MCP Interface</h4>
+    <p class="muted">4 tools that Claude agents call before any <code>model_edit</code> call — guaranteed physically-valid assembly context.</p>
+  </div>
+</div>
+
+<div class="callout callout-info">
+  <div class="callout-title">The meta-test (T9)</div>
+  Agent A (multi-agent workflow) → builds <code>FEM_IM_FOC_MA.slx</code>.<br>
+  SimVault → indexes it automatically.<br>
+  Agent B (future session) → finds it via <code>simvault_search</code>, assembles a new model reusing that exact subsystem.<br><br>
+  If T9 passes, every agentic build enriches the shared library — work compounds.
+</div>
+
+<!-- ─── Architecture ───────────────────────────────────────────── -->
+<h2 id="architecture">Architecture</h2>
+
+<div class="pipeline">
+  <div class="pipe-node">
+    <div class="pipe-icon">📂</div>
+    <div><div class="pipe-name">.slx files</div><div class="pipe-desc">Examples: PMSM_FEM.slx, MotorThermal11Node.slx, FEM_IM_FOC_MA.slx</div></div>
+  </div>
+  <div class="pipe-node">
+    <div class="pipe-icon">⚙️</div>
+    <div><div class="pipe-name">extract_metadata.m</div><div class="pipe-desc">SHA-256 lock · SL2PS/PS2SL port detection · SimVault tag parsing · JSON output</div></div>
+    <div class="pipe-lang"><span class="badge badge-blue">MATLAB</span></div>
+  </div>
+  <div class="pipe-node">
+    <div class="pipe-icon">🔤</div>
+    <div><div class="pipe-name">canonicalize.py</div><div class="pipe-desc">Maps raw port names → canonical vocabulary · writes Markdown specs to kb/models/</div></div>
+    <div class="pipe-lang"><span class="badge badge-cyan">Python</span></div>
+  </div>
+  <div class="pipe-node">
+    <div class="pipe-icon">🕸</div>
+    <div><div class="pipe-name">build_graph.py + index.py</div><div class="pipe-desc">NetworkX graph (compatible_with / fidelity_chain / requires_input_from) + ChromaDB embeddings</div></div>
+    <div class="pipe-lang"><span class="badge badge-cyan">Python</span></div>
+  </div>
+  <div class="pipe-node">
+    <div class="pipe-icon">🔍</div>
+    <div><div class="pipe-name">query.py</div><div class="pipe-desc">Semantic search → graph expansion → port validation → QueryResult</div></div>
+    <div class="pipe-lang"><span class="badge badge-cyan">Python</span></div>
+  </div>
+  <div class="pipe-node">
+    <div class="pipe-icon">🤖</div>
+    <div><div class="pipe-name">mcp_server.py</div><div class="pipe-desc">4 MCP tools · stdio transport · configurable via SIMVAULT_ROOT env var</div></div>
+    <div class="pipe-lang"><span class="badge badge-cyan">Python</span></div>
+  </div>
+</div>
+
+<h3>Data flow</h3>
+<pre><code>simvault index examples/pmsm_drive/
+  ├─ MATLAB: extract_metadata() → extracted/*.json
+  ├─ Python: canonicalize_all() → extracted/*.json (ports updated) + kb/models/*.md
+  ├─ Python: build_graph()     → simvault.graph.json
+  └─ Python: build_index()     → .svdb/ (ChromaDB)
+
+simvault query "PMSM thermal"
+  ├─ ChromaDB: embed + cosine search → seed_ids
+  ├─ NetworkX: expand via compatible_with, fidelity_chain edges
+  ├─ validate_wire() on each compatible_with pair
+  └─ QueryResult { candidates, subgraph, validated_wires, blocked_pairs }
+</code></pre>
+
+<!-- ─── Quick Start ─────────────────────────────────────────────── -->
+<h2 id="quickstart">Quick Start</h2>
+
+<pre><code><span class="comment"># Install</span>
+pip install -e .
+
+<span class="comment"># Tag your models (run once in MATLAB)</span>
+<span class="comment"># Opens each .slx and adds SimVault Description tags</span>
+matlab -batch "run('examples/tag_models_for_simvault.m')"
+
+<span class="comment"># Index a directory of .slx files</span>
+simvault index examples/pmsm_drive/
+
+<span class="comment"># Semantic search</span>
+simvault query "PMSM thermal model" --fidelity detailed
+
+<span class="comment"># Validate a wire</span>
+simvault validate \
+  --src "PMSM_FEM/omega_shaft_rads" \
+  --dst "FOCController/omega_shaft_rads"
+
+<span class="comment"># Get full assembly context for two subsystems</span>
+simvault context PMSM_FEM MotorThermal11Node
+</code></pre>
+
+<h3>Claude Desktop MCP registration</h3>
+<pre><code><span class="comment">// claude_desktop_config.json</span>
+{
+  <span class="str">"mcpServers"</span>: {
+    <span class="str">"simvault"</span>: {
+      <span class="str">"command"</span>: <span class="str">"python"</span>,
+      <span class="str">"args"</span>: [<span class="str">"-m"</span>, <span class="str">"simvault.mcp_server"</span>],
+      <span class="str">"cwd"</span>: <span class="str">"/path/to/SimVault"</span>,
+      <span class="str">"env"</span>: { <span class="str">"SIMVAULT_ROOT"</span>: <span class="str">"/path/to/SimVault"</span> }
+    }
+  }
+}
+</code></pre>
+
+<!-- ─── Parser ──────────────────────────────────────────────────── -->
+<h2 id="parser">Parser — <code>extract_metadata.m</code></h2>
+
+<p>The only MATLAB component. Everything downstream is pure Python.</p>
+
+<h3>What it does</h3>
+<ul>
+  <li>Crawls a directory for <code>.slx</code> files (recursive, skips <code>slprj</code> and <code>_archive</code>)</li>
+  <li>Computes SHA-256 via <code>shasum -a 256</code> and skips unchanged files (lock file)</li>
+  <li>Loads each model, finds the tagged subsystem, extracts one entry per <code>.slx</code></li>
+  <li>Detects ports from: top-level Inport/Outport blocks + <code>SL2PS_*</code> / <code>PS2SL_*</code> bridge blocks + sensor subsystems</li>
+  <li>Saves to <code>extracted/&lt;model_name&gt;.json</code></li>
+</ul>
+
+<h3>Port detection logic</h3>
+<table>
+  <tr><th>Source</th><th>Port name</th><th>Direction</th></tr>
+  <tr><td>Top-level <code>Inport</code> block</td><td>Block name</td><td>input</td></tr>
+  <tr><td>Top-level <code>Outport</code> block</td><td>Block name</td><td>output</td></tr>
+  <tr><td><code>SL2PS_*</code> block (any depth)</td><td>Block name minus prefix</td><td>input</td></tr>
+  <tr><td><code>PS2SL_*</code> block (any depth)</td><td>Block name minus prefix</td><td>output</td></tr>
+  <tr><td><code>TPS</code>, <code>SpeedPS</code>, <code>Tem_*</code></td><td>Block name</td><td>output</td></tr>
+</table>
+
+<h3>SimVault Description tags</h3>
+<p>Add these to a subsystem's Description field in Simulink:</p>
+<pre><code>fidelity_tier: detailed
+analysis_type: torque_accuracy
+solver_contract: continuous
+</code></pre>
+<p>The parser searches all subsystems for a Description containing <code>fidelity_tier</code> and uses that block's tags for the model entry. If none found, infers fidelity from block count.</p>
+
+<!-- ─── Canonicalizer ───────────────────────────────────────────── -->
+<h2 id="canonicalizer">Canonicalizer — <code>canonicalize.py</code></h2>
+
+<p>Maps <code>original_name</code> → <code>canonical_name</code> using regex patterns. The canonical vocabulary is the shared language that makes the graph's <code>compatible_with</code> edges meaningful.</p>
+
+<pre><code><span class="kw">from</span> simvault.canonicalizer.canonicalize <span class="kw">import</span> canonicalize_port
+
+port = {<span class="str">"original_name"</span>: <span class="str">"Rotor_Iron_Loss"</span>, <span class="str">"units"</span>: <span class="str">"W"</span>, <span class="str">"direction"</span>: <span class="str">"input"</span>}
+result = canonicalize_port(port)
+<span class="comment"># result["canonical_name"]  == "loss_iron_W"</span>
+<span class="comment"># result["canonical_units"] == "W"</span>
+<span class="comment"># result["canonicalized"]   == True</span>
+</code></pre>
+
+<h3>Markdown spec output</h3>
+<p>Each subsystem gets a <code>kb/models/&lt;model&gt;_&lt;subsystem&gt;.md</code> file with:</p>
+<ul>
+  <li>YAML frontmatter: fidelity_tier, analysis_type, solver_contract, source_hash, block_count</li>
+  <li>Port interface table with canonical names and canonicalization status</li>
+  <li>Compatibility alerts (unmatched loss inputs, unit mismatches)</li>
+</ul>
+
+<!-- ─── Graph ────────────────────────────────────────────────────── -->
+<h2 id="graph">Graph Builder — <code>build_graph.py</code></h2>
+
+<h3>Node types</h3>
+<table>
+  <tr><th>Type</th><th>ID format</th><th>Attributes</th></tr>
+  <tr><td><code>subsystem</code></td><td><code>PMSM_FEM</code></td><td>fidelity_tier, analysis_type, solver_contract, block_count, source_hash</td></tr>
+  <tr><td><code>port</code></td><td><code>PMSM_FEM/ports/omega_shaft_rads</code></td><td>original_name, canonical_name, direction, domain, canonical_units</td></tr>
+</table>
+
+<h3>Edge types</h3>
+<table>
+  <tr><th>Type</th><th>Source → Dest</th><th>Condition</th></tr>
+  <tr><td><code>has_port</code></td><td>subsystem → port</td><td>Always</td></tr>
+  <tr><td><code>compatible_with</code></td><td>port → port</td><td>Same canonical_name, domain, solver_contract; directions input↔output</td></tr>
+  <tr><td><code>fidelity_chain</code></td><td>subsystem ↔ subsystem</td><td>Same stem name, different fidelity_tier (FEM ↔ avg)</td></tr>
+  <tr><td><code>requires_input_from</code></td><td>thermal subsystem → EM subsystem</td><td>Thermal input has no compatible_with partner</td></tr>
+</table>
+
+<h3>Fidelity stem matching</h3>
+<p>Strips known suffixes before comparing: <code>_fem</code>, <code>_avg</code>, <code>_averaged</code>, <code>_lut</code>, <code>_nn</code>, <code>_simplified</code>, <code>_detailed</code>, <code>_hifi</code>, <code>_reduced</code>. So <code>PMSM_FEM</code> and <code>PMSM_avg</code> share the stem <code>PMSM</code> → fidelity_chain edge.</p>
+
+<!-- ─── Vectors ──────────────────────────────────────────────────── -->
+<h2 id="vectors">Vector Store — <code>index.py</code></h2>
+
+<p>Uses <strong>ChromaDB</strong> (persistent) with <strong>BAAI/bge-small-en-v1.5</strong> embeddings (384-dim cosine). Each subsystem is embedded as a rich document:</p>
+
+<pre><code>doc = f"{causal_summary} | Model: {name} | Fidelity: {fidelity_tier} | "
+      f"Analysis: {analysis_type} | Solver: {solver_contract} | "
+      f"Canonical ports: {canonical_names} | Port names: {original_names}"
+</code></pre>
+
+<p>Incremental re-index: compares <code>source_hash</code> in collection metadata and skips unchanged entries. Re-indexing a directory with no changes completes in &lt;3s.</p>
+
+<h3>Hard filters</h3>
+<p>ChromaDB <code>where</code> clauses enforce hard filters <em>before</em> semantic ranking — a query with <code>fidelity_tier=detailed</code> will never return a <code>simplified</code> model, regardless of similarity score.</p>
+
+<!-- ─── Validator ───────────────────────────────────────────────── -->
+<h2 id="validator">Validator — <code>validate_ports.py</code></h2>
+
+<p>Four rules, evaluated in order. First failure wins.</p>
+
+<table>
+  <tr><th>#</th><th>Rule</th><th>Result</th><th>Example</th></tr>
+  <tr>
+    <td>1</td><td>Domain must match</td>
+    <td><span class="badge badge-block">BLOCK</span></td>
+    <td>thermal → signal: <em>cannot cross domain boundary</em></td>
+  </tr>
+  <tr>
+    <td>2</td><td>Direction must be compatible (input↔output or bidirectional)</td>
+    <td><span class="badge badge-block">BLOCK</span></td>
+    <td>output → output</td>
+  </tr>
+  <tr>
+    <td>3</td><td>Units must match or have a known conversion</td>
+    <td><span class="badge badge-warn">WARN</span> or <span class="badge badge-block">BLOCK</span></td>
+    <td>rad/s → rpm: WARN + Gain(0.1047). W → kW: WARN + Gain(0.001).</td>
+  </tr>
+  <tr>
+    <td>4</td><td>Solver contract must match</td>
+    <td><span class="badge badge-warn">WARN</span></td>
+    <td>continuous ↔ discrete: WARN + Rate Transition block required</td>
+  </tr>
+</table>
+
+<pre><code><span class="kw">from</span> simvault.validator.validate_ports <span class="kw">import</span> PortSpec, validate_wire
+
+src = PortSpec(domain=<span class="str">"signal"</span>, direction=<span class="str">"output"</span>, canonical_units=<span class="str">"rad/s"</span>)
+dst = PortSpec(domain=<span class="str">"signal"</span>, direction=<span class="str">"input"</span>,  canonical_units=<span class="str">"rpm"</span>)
+result = validate_wire(src, dst)
+<span class="comment"># result.result              == "WARN"</span>
+<span class="comment"># result.required_bridge_block == "Gain (factor: 9.549...)"</span>
+<span class="comment"># result.gain_factor           == 9.5493...</span>
+</code></pre>
+
+<!-- ─── Query ────────────────────────────────────────────────────── -->
+<h2 id="query">Query Engine — <code>query.py</code></h2>
+
+<h3>Algorithm</h3>
+<ol>
+  <li><strong>Hard filter</strong> — ChromaDB <code>where</code> clause by fidelity/analysis/solver</li>
+  <li><strong>Semantic search</strong> — top-K by cosine similarity</li>
+  <li><strong>Graph expansion</strong> — from each seed subsystem: include port nodes → follow <code>compatible_with</code> → include partner subsystems and their ports</li>
+  <li><strong>Wire validation</strong> — call <code>validate_wire()</code> on every <code>compatible_with</code> pair in the subgraph</li>
+  <li><strong>Return</strong> — <code>QueryResult</code> with candidates, subgraph, validated_wires, blocked_pairs</li>
+</ol>
+
+<pre><code><span class="kw">from</span> simvault.query.query <span class="kw">import</span> query
+
+result = query(
+    <span class="str">"high-fidelity PMSM thermal"</span>,
+    fidelity_tier=<span class="str">"detailed"</span>,
+    top_k=<span class="num">5</span>,
+)
+<span class="comment"># result.candidates[0].subsystem_id == "MotorThermal11Node"  ← #1 after corpus enrichment</span>
+<span class="comment"># "MotorThermal11Node" in result.subgraph.nodes</span>
+<span class="comment"># len(result.validated_wires) >= 72</span>
+</code></pre>
+
+<!-- ─── MCP ──────────────────────────────────────────────────────── -->
+<h2 id="mcp">MCP Server — <code>mcp_server.py</code></h2>
+
+<p>Stdio-transport MCP server. Claude agents call these tools before any <code>model_edit</code> operation.</p>
+
+<h3 id="mcp-tools">Tool Reference</h3>
+
+<div class="card">
+  <h4><code>simvault_search</code></h4>
+  <p>Semantic search with optional hard filters.</p>
+  <table>
+    <tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr>
+    <tr><td><code>query</code></td><td>string</td><td>yes</td><td>Natural language description</td></tr>
+    <tr><td><code>fidelity_tier</code></td><td>string</td><td>no</td><td>detailed | simplified | lookup</td></tr>
+    <tr><td><code>analysis_type</code></td><td>string</td><td>no</td><td>torque_accuracy | efficiency | thermal | drive_cycle</td></tr>
+    <tr><td><code>solver_contract</code></td><td>string</td><td>no</td><td>continuous | discrete | steady_state</td></tr>
+    <tr><td><code>top_k</code></td><td>integer</td><td>no</td><td>Max results (default 5)</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <h4><code>simvault_validate_wire</code></h4>
+  <p>Validate a proposed port connection. Returns JSON with result, reason, bridge block, gain factor.</p>
+  <table>
+    <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+    <tr><td><code>src_subsystem_id</code></td><td>string</td><td>Source model ID (e.g. <code>PMSM_FEM</code>)</td></tr>
+    <tr><td><code>src_port_canonical</code></td><td>string</td><td>Canonical port name (e.g. <code>loss_copper_W</code>)</td></tr>
+    <tr><td><code>dst_subsystem_id</code></td><td>string</td><td>Destination model ID</td></tr>
+    <tr><td><code>dst_port_canonical</code></td><td>string</td><td>Canonical port name</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <h4><code>simvault_get_assembly_context</code></h4>
+  <p>Returns full assembly context: canonical port tables, solver info, pre-validated wire pairs. Use this before any <code>model_edit</code> call.</p>
+  <table>
+    <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+    <tr><td><code>subsystem_ids</code></td><td>array of string</td><td>Models to assemble (e.g. <code>["PMSM_FEM", "MotorThermal11Node"]</code>)</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <h4><code>simvault_smoke_test</code></h4>
+  <p>Load check + optional 0.1s simulation at a rated operating point. Currently a stub — Phase 2 will wire this to the MATLAB MCP.</p>
+  <table>
+    <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+    <tr><td><code>model_path</code></td><td>string</td><td>Absolute path to .slx file</td></tr>
+    <tr><td><code>rated_operating_point</code></td><td>object</td><td>Optional workspace variables (e.g. <code>{"speed_rpm": 3000}</code>)</td></tr>
+  </table>
+</div>
+
+<!-- ─── CLI ─────────────────────────────────────────────────────── -->
+<h2 id="cli">CLI — <code>cli.py</code></h2>
+
+<table>
+  <tr><th>Command</th><th>Description</th></tr>
+  <tr><td><code>simvault index &lt;dir&gt;</code></td><td>Full pipeline: MATLAB extract → canonicalize → graph → vector index</td></tr>
+  <tr><td><code>simvault query &lt;text&gt; [--fidelity] [--analysis] [--solver] [--top-k]</code></td><td>Semantic search with optional hard filters</td></tr>
+  <tr><td><code>simvault validate --src &lt;id/port&gt; --dst &lt;id/port&gt;</code></td><td>Validate a proposed wire (coloured PASS/WARN/BLOCK output)</td></tr>
+  <tr><td><code>simvault context &lt;id1&gt; &lt;id2&gt; ...</code></td><td>Full assembly context as JSON</td></tr>
+</table>
+
+<p>Use <code>--skip-matlab</code> on <code>index</code> if JSONs already exist (re-canonicalize/re-graph only).</p>
+
+<!-- ─── Schema ───────────────────────────────────────────────────── -->
+<h2 id="schema">JSON Schema — <code>extracted/*.json</code></h2>
+
+<pre><code>{
+  <span class="str">"model_name"</span>:  <span class="str">"MotorThermal11Node"</span>,
+  <span class="str">"source_file"</span>: <span class="str">"/path/to/MotorThermal11Node.slx"</span>,
+  <span class="str">"source_hash"</span>: <span class="str">"662ebac0..."</span>,
+  <span class="str">"subsystems"</span>: [
+    {
+      <span class="str">"id"</span>:   <span class="str">"MotorThermal11Node"</span>,
+      <span class="str">"name"</span>: <span class="str">"MotorThermal11Node"</span>,
+      <span class="str">"source_file"</span>: <span class="str">"..."</span>,
+      <span class="str">"source_hash"</span>: <span class="str">"..."</span>,
+      <span class="str">"description"</span>:    <span class="str">"fidelity_tier: detailed\nanalysis_type: thermal\n..."</span>,
+      <span class="str">"causal_summary"</span>: <span class="str">"Subsystem: MotorThermal11Node"</span>,
+      <span class="str">"tags"</span>: {
+        <span class="str">"fidelity_tier"</span>:   <span class="str">"detailed"</span>,
+        <span class="str">"analysis_type"</span>:   <span class="str">"thermal"</span>,
+        <span class="str">"solver_contract"</span>: <span class="str">"continuous"</span>
+      },
+      <span class="str">"solver"</span>: {
+        <span class="str">"type"</span>:        <span class="str">"continuous"</span>,
+        <span class="str">"name"</span>:        <span class="str">"ode15s"</span>,
+        <span class="str">"sample_time"</span>: -<span class="num">1</span>
+      },
+      <span class="str">"block_count"</span>: <span class="num">67</span>,
+      <span class="str">"state_count"</span>: -<span class="num">1</span>,
+      <span class="str">"ports"</span>: [
+        {
+          <span class="str">"original_name"</span>:   <span class="str">"Rotor_Iron_Loss"</span>,
+          <span class="str">"direction"</span>:       <span class="str">"input"</span>,
+          <span class="str">"port_type"</span>:       <span class="str">"signal"</span>,
+          <span class="str">"domain"</span>:          <span class="str">"signal"</span>,
+          <span class="str">"units"</span>:           <span class="str">"W"</span>,
+          <span class="str">"canonical_name"</span>:  <span class="str">"loss_iron_W"</span>,
+          <span class="str">"canonical_units"</span>: <span class="str">"W"</span>,
+          <span class="str">"unit_mismatch"</span>:   <span class="kw">false</span>,
+          <span class="str">"scale_factor"</span>:    <span class="kw">null</span>,
+          <span class="str">"canonicalized"</span>:   <span class="kw">true</span>
+        }
+      ]
+    }
+  ]
+}
+</code></pre>
+
+<!-- ─── Canonical Names ─────────────────────────────────────────── -->
+<h2 id="canonical-names">Canonical Port Names</h2>
+
+<table>
+  <tr><th>Canonical name</th><th>Units</th><th>Matched patterns (regex, case-insensitive)</th></tr>
+  <tr><td><code>omega_shaft_rads</code></td><td>rad/s</td><td>omega, speed, w_shaft, SpeedPS, wr\b, omega_r</td></tr>
+  <tr><td><code>torque_shaft_Nm</code></td><td>N·m</td><td>torque, TPS\b, trq, tau</td></tr>
+  <tr><td><code>temperature_K</code></td><td>K</td><td>temp, AirGap, Frame, Magnets, Shaft, SlotWinding, StatorTooth, EndWinding, …</td></tr>
+  <tr><td><code>id_current_A</code></td><td>A</td><td>^id$, ^Id$, i_d</td></tr>
+  <tr><td><code>iq_current_A</code></td><td>A</td><td>^iq$, ^Iq$, i_q</td></tr>
+  <tr><td><code>vdc_V</code></td><td>V</td><td>Vdc, v_dc, VDC, DC_voltage</td></tr>
+  <tr><td><code>loss_copper_W</code></td><td>W</td><td>Q_copper, P_copper, Pcu, Copper_Loss, End_Winding_Copper, Side_Winding_Copper</td></tr>
+  <tr><td><code>loss_iron_W</code></td><td>W</td><td>Q_iron, P_iron, Pfe, iron_loss, Iron_Loss, Stator_Teeth_Loss, Rotor_Iron_Loss, Magnet_Eddy</td></tr>
+  <tr><td><code>id_current_A</code></td><td>A</td><td>id, i_d, isd, i_sd, id_ref, id_curr</td></tr>
+  <tr><td><code>iq_current_A</code></td><td>A</td><td>iq, i_q, isq, i_sq, iq_ref, iq_curr</td></tr>
+  <tr><td><code>iabc_A</code></td><td>A</td><td>iabc, i_abc, ia_A, ib_A, ic_A</td></tr>
+  <tr><td><code>vabc_V</code></td><td>V</td><td>vabc, v_abc, Vabc</td></tr>
+  <tr><td><code>flux_d_Wb</code></td><td>Wb</td><td>flux_d, lambda_d, psi_d</td></tr>
+  <tr><td><code>flux_q_Wb</code></td><td>Wb</td><td>flux_q, lambda_q, psi_q</td></tr>
+  <tr><td><code>field_angle_rad</code></td><td>rad</td><td>field_angle, theta_e, angle_el, angle_rad</td></tr>
+  <tr><td><code>omega_slip_rads</code></td><td>rad/s</td><td>slip, omega_slip</td></tr>
+</table>
+
+<h3>Unit conversion table</h3>
+<table>
+  <tr><th>From</th><th>To</th><th>Factor</th><th>Result</th></tr>
+  <tr><td>rpm</td><td>rad/s</td><td>2π/60 = 0.1047</td><td><span class="badge badge-warn">WARN</span></td></tr>
+  <tr><td>rad/s</td><td>rpm</td><td>60/2π = 9.549</td><td><span class="badge badge-warn">WARN</span></td></tr>
+  <tr><td>degC</td><td>K</td><td>+273.15</td><td><span class="badge badge-warn">WARN</span></td></tr>
+  <tr><td>W</td><td>kW</td><td>0.001</td><td><span class="badge badge-warn">WARN</span></td></tr>
+</table>
+
+<!-- ─── Corpus Enrichment ─────────────────────────────────────────── -->
+<h2 id="enrichment">Corpus Enrichment — Empirical Results</h2>
+
+<p>Enriching the 6 example models with named Outport blocks, signal labels, and block descriptions produced measurable, direct improvements across all metrics:</p>
+
+<table>
+  <tr><th>Metric</th><th>Before enrichment</th><th>After enrichment</th></tr>
+  <tr><td>Total indexed ports</td><td>14</td><td><strong>51</strong></td></tr>
+  <tr><td>Ports canonicalized</td><td>~60%</td><td><strong>100%</strong></td></tr>
+  <tr><td><code>compatible_with</code> graph edges</td><td>96</td><td><strong>144</strong> (+50%)</td></tr>
+  <tr><td>"PMSM thermal" top result</td><td>PMSM_avg</td><td><strong>MotorThermal11Node</strong> ✓</td></tr>
+  <tr><td>"induction motor FOC" top result</td><td>PMSM_avg</td><td><strong>FEM_IM_FOC_MA</strong> ✓</td></tr>
+  <tr><td>Valid assembly wires per query</td><td>48</td><td><strong>72</strong></td></tr>
+</table>
+
+<h3>What was added to each model</h3>
+
+<table>
+  <tr><th>Model</th><th>Outports added</th><th>Signal labels added</th></tr>
+  <tr><td><code>MotorThermal11Node</code></td><td><code>temperature_vector_K</code></td><td><code>loss_copper_end_winding_W</code>, <code>T_airgap_K</code>, <code>T_frame_K</code>, 14 more</td></tr>
+  <tr><td><code>PMSM_FEM</code> / <code>PMSM_avg</code></td><td><code>temperature_winding_K</code>, <code>speed_cmd_rads</code></td><td><code>id_ref_A</code>, <code>iq_ref_A</code>, <code>speed_ref_rpm</code></td></tr>
+  <tr><td><code>FOCController</code></td><td><code>temperature_winding_K</code>, <code>speed_ref_rads</code></td><td><code>speed_ref_rads</code>, <code>torque_ref_Nm</code>, <code>omega_elec_rads</code></td></tr>
+  <tr><td><code>FEM_IM</code></td><td><code>ia_A</code>, <code>ib_A</code>, <code>ic_A</code> <em>(was 0 ports)</em></td><td>3-phase current labels on Probe outputs</td></tr>
+  <tr><td><code>FEM_IM_FOC_MA</code></td><td><code>iabc_A</code>, <code>isd_A</code>, <code>isq_A</code>, <code>omega_shaft_rads</code>, <code>torque_ref_Nm</code></td><td><code>field_angle_rad</code>, <code>vabc_V</code>, <code>id_ref_A</code>, <code>iq_ref_A</code></td></tr>
+</table>
+
+<div class="callout callout-tip">
+  <div class="callout-title">Takeaway</div>
+  Named Outport blocks and signal labels are the single highest-leverage improvement you can make to a model before indexing it. <strong>FEM_IM went from 0 indexed ports to 3</strong> just by adding Outport blocks to the Probe outputs.
+</div>
+
+<!-- ─── Signal naming guide ─────────────────────────────────────── -->
+<h2 id="signal-guide">Signal Naming Guide — Getting the Best from SimVault</h2>
+
+<p>The canonicalizer matches on port names. The better your model's port names, the richer the graph and the more accurate the assembly context. This is the highest-leverage improvement you can make to your corpus.</p>
+
+<div class="callout callout-tip">
+  <div class="callout-title">Key insight — validated empirically</div>
+  Every named Inport/Outport block becomes a port in the graph. Every graph port can generate <code>compatible_with</code> edges. More named ports → more edges → better agent assembly. Enriching 6 models increased <code>compatible_with</code> edges by 50% and corrected query ranking for both thermal and induction motor searches.
+</div>
+
+<h3>Recommended practices</h3>
+
+<h4>1. Add named Inport/Outport blocks at the model boundary</h4>
+<p>In your top-level model, replace numbered ports with named ones:</p>
+
+<table>
+  <tr><th>Signal</th><th>Good name</th><th>Bad name</th><th>Canonical</th></tr>
+  <tr><td>Shaft speed out</td><td><code>omega_shaft_rads</code></td><td><code>Out1</code></td><td>omega_shaft_rads</td></tr>
+  <tr><td>Electromagnetic torque</td><td><code>torque_shaft_Nm</code></td><td><code>2</code></td><td>torque_shaft_Nm</td></tr>
+  <tr><td>Copper loss to thermal</td><td><code>loss_copper_W</code></td><td><code>signal_out</code></td><td>loss_copper_W</td></tr>
+  <tr><td>Iron loss to thermal</td><td><code>loss_iron_W</code></td><td><code>Out3</code></td><td>loss_iron_W</td></tr>
+  <tr><td>d-axis current</td><td><code>id</code></td><td><code>input_1</code></td><td>id_current_A</td></tr>
+  <tr><td>q-axis current</td><td><code>iq</code></td><td><code>input_2</code></td><td>iq_current_A</td></tr>
+  <tr><td>DC bus voltage</td><td><code>Vdc</code></td><td><code>DC_in</code></td><td>vdc_V</td></tr>
+</table>
+
+<h4>2. Use SL2PS_/PS2SL_ naming for Simscape physical bridges</h4>
+<p>The parser auto-detects these patterns — the block name becomes the port name:</p>
+<pre><code>SL2PS_Copper_Loss    → port "Copper_Loss"  → canonical loss_copper_W  (input)
+SL2PS_Iron_Loss      → port "Iron_Loss"    → canonical loss_iron_W    (input)
+PS2SL_AirGap         → port "AirGap"       → canonical temperature_K  (output)
+PS2SL_Stator_Temp    → port "Stator_Temp"  → canonical temperature_K  (output)
+</code></pre>
+
+<h4>3. Add port unit and domain tags to the subsystem Description</h4>
+<pre><code>fidelity_tier: detailed
+analysis_type: torque_accuracy
+solver_contract: continuous
+units_omega_shaft_rads: rad/s
+domain_omega_shaft_rads: signal
+units_loss_copper_W: W
+</code></pre>
+
+<h4>4. Write a good causal summary in the Description</h4>
+<p>The first non-tag line becomes the embedding document's summary — it's what semantic search uses. Make it descriptive:</p>
+<pre><code>FEM-based IPMSM motor model with torque accuracy at full speed range.
+fidelity_tier: detailed
+analysis_type: torque_accuracy
+solver_contract: continuous
+</code></pre>
+<p>This is better than just leaving the Description empty or using only tags.</p>
+
+<h4>5. Name fidelity variants consistently</h4>
+<p>SimVault detects fidelity_chain edges by stem-matching. Keep your variant names consistent:</p>
+<pre><code>PMSM_FEM.slx   + PMSM_avg.slx     → stem "PMSM" → fidelity_chain ✓
+FOC_detailed.slx + FOC_simplified.slx → stems differ → no edge ✗
+FOC_FEM.slx    + FOC_avg.slx      → stem "FOC"  → fidelity_chain ✓
+</code></pre>
+
+<!-- ─── Tests ─────────────────────────────────────────────────────── -->
+<h2 id="tests">Integration Tests</h2>
+
+<pre><code>cd SimVault
+python -m pytest tests/ -v
+</code></pre>
+
+<table>
+  <tr><th>Suite</th><th>Count</th><th>Coverage</th></tr>
+  <tr><td>TestCanonicalization</td><td>4</td><td>omega_rpm→rad/s, Iron_Loss, Copper_Loss, AirGap temperature</td></tr>
+  <tr><td>TestValidator</td><td>5</td><td>domain BLOCK, unit WARN + gain_factor, PASS, direction BLOCK, solver WARN</td></tr>
+  <tr><td>TestGraph</td><td>5</td><td>fidelity_chain presence, PMSM_FEM↔PMSM_avg, compatible_with, thermal node, tags</td></tr>
+  <tr><td>TestQuery</td><td>5</td><td>PMSM in candidates, fidelity filter hard, thermal in subgraph, valid wires, IM query</td></tr>
+  <tr><td>TestThermalModel</td><td>4</td><td>loss_iron_W input, loss_copper_W input, temperature_K output, tags correct</td></tr>
+</table>
+
+<!-- ─── Test matrix ─────────────────────────────────────────────── -->
+<h2 id="test-matrix">T1–T9 Acceptance Matrix</h2>
+
+<p>Run after <code>simvault index examples/pmsm_drive/</code> to validate intent:</p>
+
+<table>
+  <tr><th>#</th><th>Command</th><th>Expected</th><th>Capability</th><th>Status</th></tr>
+  <tr>
+    <td>T1</td>
+    <td><code>query "PMSM motor" --fidelity detailed</code></td>
+    <td>PMSM_FEM returned; PMSM_avg NOT returned</td>
+    <td>Hard fidelity filter</td>
+    <td><span class="test-pass">PASS</span></td>
+  </tr>
+  <tr>
+    <td>T2</td>
+    <td><code>query "PMSM motor"</code> (no filter)</td>
+    <td>Both PMSM_FEM + PMSM_avg returned, linked by fidelity_chain</td>
+    <td>Fidelity chain graph edge</td>
+    <td><span class="test-pass">PASS</span></td>
+  </tr>
+  <tr>
+    <td>T3</td>
+    <td><code>query "thermal model for PMSM"</code></td>
+    <td>MotorThermal11Node returned with PMSM_FEM in subgraph</td>
+    <td>Cross-model graph expansion</td>
+    <td><span class="test-pass">PASS</span></td>
+  </tr>
+  <tr>
+    <td>T4</td>
+    <td><code>query "FOC" --analysis drive_cycle</code></td>
+    <td>FOCController + FEM_IM_FOC_MA returned; thermal NOT returned</td>
+    <td>Analysis type filter</td>
+    <td><span class="test-pass">PASS</span></td>
+  </tr>
+  <tr>
+    <td>T5</td>
+    <td><code>validate --src PMSM_FEM/omega_shaft_rads --dst MotorThermal11Node/temperature_K</code></td>
+    <td><span class="badge badge-block">BLOCK</span>: domain mismatch</td>
+    <td>Domain mismatch detection</td>
+    <td><span class="test-pass">PASS</span></td>
+  </tr>
+  <tr>
+    <td>T6</td>
+    <td><code>validate --src PMSM_FEM/omega_shaft_rads --dst FOCController/omega_shaft_rads</code></td>
+    <td><span class="badge badge-pass">PASS</span> (same canonical units)</td>
+    <td>Valid wire</td>
+    <td><span class="test-pass">PASS</span></td>
+  </tr>
+  <tr>
+    <td>T7</td>
+    <td>validate copper loss input→output pair</td>
+    <td><span class="badge badge-pass">PASS</span></td>
+    <td>Validator happy path</td>
+    <td><span class="test-pass">PASS</span></td>
+  </tr>
+  <tr>
+    <td>T8</td>
+    <td><code>simvault_search</code> + <code>simvault_get_assembly_context</code> via MCP</td>
+    <td>Context with canonical port names, solver info, no BLOCK wires</td>
+    <td>Full agent query path</td>
+    <td><span class="test-pass">PASS</span></td>
+  </tr>
+  <tr>
+    <td>T9</td>
+    <td><code>index MultiAgentWorkflow/models/ &amp;&amp; query "induction motor FOC"</code></td>
+    <td>FEM_IM_FOC_MA returned with correct tags</td>
+    <td><strong>Meta-test: agent-built models are reusable</strong></td>
+    <td><span class="test-pass">PASS</span></td>
+  </tr>
+</table>
+
+<!-- ─── Roadmap ─────────────────────────────────────────────────── -->
+<h2 id="roadmap">Roadmap</h2>
+
+<table>
+  <tr><th>Phase</th><th>Feature</th><th>Status</th></tr>
+  <tr><td>Phase 1</td><td>Core pipeline: parser, canonicalizer, graph, vectors, validator, query, MCP, CLI</td><td><span class="badge badge-pass">Complete</span></td></tr>
+  <tr><td>Phase 1b</td><td>Corpus enrichment: named Outport blocks + signal labels on all 6 example models → 51 ports, 100% canonical, 144 edges</td><td><span class="badge badge-pass">Complete</span></td></tr>
+  <tr><td>Phase 2</td><td><code>simvault_smoke_test</code> wired to MATLAB MCP (real simulation check)</td><td><span class="badge badge-blue">Planned</span></td></tr>
+  <tr><td>Phase 3</td><td>WLTP drive-cycle integration test — agent assembles full drive system from SimVault</td><td><span class="badge badge-blue">Planned</span></td></tr>
+  <tr><td>Phase 4</td><td>Auto-tag from <code>.slx</code> XML (no MATLAB required for extraction)</td><td><span class="badge badge-blue">Planned</span></td></tr>
+  <tr><td>Phase 5</td><td>Multi-repo federation — index across teams, shared canonical name registry</td><td><span class="badge badge-blue">Planned</span></td></tr>
+</table>
+
+<br><br>
+<p class="muted" style="text-align:center; border-top:1px solid var(--border); padding-top:1.5rem;">
+  SimVault v0.1.0 · Phase 1 MVP · Built with Claude Code
+</p>
+
+</main>
+</div>
+</body>
+</html>
