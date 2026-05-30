@@ -222,6 +222,15 @@ Python ≥ 3.10 required. MATLAB R2024a+ required for extraction (Python pipelin
 
 ---
 
+## Contributors
+
+| Name | Role |
+|---|---|
+| [Sooraj Krishnan](https://github.com/nightfury1802) | Creator — architecture, Simscape modeling, corpus design |
+| [Claude Sonnet 4.6](https://anthropic.com) | Implementation partner |
+
+---
+
 ## Roadmap
 
 - [ ] Phase 2: `simvault_smoke_test` wired to MATLAB MCP for real simulation checks
