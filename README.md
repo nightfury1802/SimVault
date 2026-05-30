@@ -55,7 +55,7 @@ canonicalize.py             ← omega_rpm → omega_shaft_rads, loss_iron_W, etc
 ## Quick Start
 
 ```bash
-git clone <this-repo>
+git clone https://github.com/nightfury1802/SimVault.git
 cd SimVault
 pip install -e .
 
