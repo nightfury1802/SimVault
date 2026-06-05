@@ -1,6 +1,6 @@
 # SimVault
 
-**A unified knowledge graph and semantic search engine for Simscape/Simulink powertrain model libraries — built so AI agents can assemble physically-valid models without hallucinating wires.**
+**A unified knowledge graph and semantic search engine for Simscape/Simulink model libraries — built so AI agents can assemble physically-valid models without hallucinating wires.**
 
 ---
 
