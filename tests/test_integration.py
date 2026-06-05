@@ -1,7 +1,7 @@
 """
 SimVault integration tests.
 Run from SimVault/ directory: python -m pytest tests/ -v
-Requires: extracted/ JSONs + .svdb/ + simvault.graph.json (built by `simvault index`)
+Requires: extracted/ JSONs + store/kb.tq + simvault.graph.json (built by `simvault index`)
 """
 import json
 import os
@@ -176,9 +176,9 @@ class TestGraph:
 class TestQuery:
     @pytest.fixture(scope="class", autouse=True)
     def check_db(self):
-        db = _ROOT / ".svdb"
-        if not db.exists():
-            pytest.skip("Vector DB not built — run `simvault index` first.")
+        store = _ROOT / "store"
+        if not (store / "kb.tq").exists():
+            pytest.skip("Vector store not built — run `simvault index` first.")
 
     def test_query_returns_pmsm_candidate(self):
         """Search for FEM PMSM returns a PMSM model"""

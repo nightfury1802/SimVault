@@ -8,13 +8,15 @@ dist/
 build/
 .venv/
 venv/
+.pytest_cache/
 
-# SimVault generated artifacts (rebuild with `simvault index`)
+# SimVault generated artifacts (rebuild with `simvault index` / `simvault kb-update`)
 .svdb/
-extracted/
-kb/
+store/
 simvault.graph.json
 simvault.lock.json
+extracted/
+kb/
 
 # Editor / OS
 .DS_Store
@@ -27,3 +29,14 @@ simvault.lock.json
 
 # Example .slx files (large binaries — symlink or copy locally)
 examples/pmsm_drive/*.slx
+
+# Personal / planning artifacts — not for public repo
+CLAUDE.md
+premortem/
+docs/superpowers/
+docs/PLAN.md
+docs/kb/
+docs/GRAPH_REPORT.md
+docs/GRAPH_TREE.html
+docs/graph.html
+hooks/

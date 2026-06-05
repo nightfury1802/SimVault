@@ -233,7 +233,8 @@ def save_graph(G: nx.DiGraph, path: str = "simvault.graph.json") -> None:
 
 def load_graph(path: str = "simvault.graph.json") -> nx.DiGraph:
     data = json.loads(Path(path).read_text())
-    return nx.node_link_graph(data, directed=True, multigraph=False)
+    edge_key = "links" if "links" in data else "edges"
+    return nx.node_link_graph(data, directed=True, multigraph=False, edges=edge_key)
 
 
 def graph_summary(G: nx.DiGraph) -> str:

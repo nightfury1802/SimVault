@@ -47,15 +47,15 @@ def query(
     solver_contract: str | None = None,
     top_k: int = 5,
     graph_depth: int = 2,
-    db_path: str = ".svdb",
+    store_dir: str = "store",
     graph_path: str = "simvault.graph.json",
 ) -> QueryResult:
     """
     Search SimVault for subsystems matching `text`.
 
     Steps:
-    1. Hard filter by fidelity/analysis/solver in ChromaDB.
-    2. Semantic search on filtered set.
+    1. Hard filter by fidelity/analysis/solver (post-filter on turbovec results).
+    2. Semantic search on indexed set.
     3. Graph expansion: add compatible_with, fidelity_chain, requires_input_from neighbors.
     4. Validate candidate wires in the subgraph.
     5. Return QueryResult.
@@ -67,7 +67,7 @@ def query(
         analysis_type=analysis_type,
         solver_contract=solver_contract,
         top_k=top_k,
-        db_path=db_path,
+        store_dir=store_dir,
     )
 
     seed_ids: list[str] = raw["ids"][0] if raw["ids"] else []

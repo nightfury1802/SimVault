@@ -1,14 +1,16 @@
 [project]
 name = "simvault"
-version = "0.1.0"
-requires-python = ">=3.10"
+version = "0.2.0"
+requires-python = ">=3.11"
 dependencies = [
-    "chromadb>=0.4",
-    "sentence-transformers>=2.2",
+    "sentence-transformers>=2.7.0",
     "networkx>=3.0",
-    "click>=8.0",
-    "numpy>=1.24",
     "mcp>=1.0",
+    "click>=8.0",
+    "numpy>=1.24.0",
+    "turbovec>=0.1.0",
+    "rank-bm25>=0.2.2",
+    "anthropic>=0.40.0",
 ]
 
 [project.scripts]

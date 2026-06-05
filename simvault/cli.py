@@ -27,11 +27,11 @@ def cli():
 @click.argument("model_dir")
 @click.option("--extracted-dir", default="extracted",   help="Output dir for extracted JSON")
 @click.option("--kb-dir",        default="kb/models",   help="Output dir for Markdown specs")
-@click.option("--db-path",       default=".svdb",       help="ChromaDB persistence path")
+@click.option("--store-dir",     default="store",       help="Vector store directory")
 @click.option("--graph-path",    default="simvault.graph.json", help="Graph output path")
 @click.option("--lock-file",     default="simvault.lock.json",  help="Lock file path")
 @click.option("--skip-matlab",   is_flag=True,          help="Skip MATLAB extraction (use existing JSONs)")
-def index(model_dir, extracted_dir, kb_dir, db_path, graph_path, lock_file, skip_matlab):
+def index(model_dir, extracted_dir, kb_dir, store_dir, graph_path, lock_file, skip_matlab):
     """Index a directory of .slx files into SimVault."""
     import os
 
@@ -52,8 +52,8 @@ def index(model_dir, extracted_dir, kb_dir, db_path, graph_path, lock_file, skip
     from simvault.graph.build_graph import graph_summary
     click.echo(graph_summary(G))
 
-    click.echo(f"Building vector index into: {db_path}")
-    build_index(extracted_dir, db_path)
+    click.echo(f"Building vector index into: {store_dir}")
+    build_index(extracted_dir, store_dir=store_dir)
 
     click.echo("Done. SimVault index ready.")
 
@@ -95,9 +95,9 @@ def _run_matlab_extractor(model_dir: str, extracted_dir: str, lock_file: str) ->
 @click.option("--analysis",  default=None, help="Filter: torque_accuracy | efficiency | thermal | drive_cycle")
 @click.option("--solver",    default=None, help="Filter: continuous | discrete | steady_state")
 @click.option("--top-k",     default=5,    help="Max results")
-@click.option("--db-path",   default=".svdb",              help="ChromaDB path")
+@click.option("--store-dir", default="store",               help="Vector store directory")
 @click.option("--graph-path",default="simvault.graph.json", help="Graph path")
-def query_cmd(query_text, fidelity, analysis, solver, top_k, db_path, graph_path):
+def query_cmd(query_text, fidelity, analysis, solver, top_k, store_dir, graph_path):
     """Search SimVault for subsystems matching a natural language description."""
     result = _query(
         text=query_text,
@@ -105,7 +105,7 @@ def query_cmd(query_text, fidelity, analysis, solver, top_k, db_path, graph_path
         analysis_type=analysis,
         solver_contract=solver,
         top_k=top_k,
-        db_path=db_path,
+        store_dir=store_dir,
         graph_path=graph_path,
     )
     click.echo(format_result(result))
@@ -160,6 +160,119 @@ def context(subsystem_ids, json_dir, graph_path):
     import json
     ctx = get_assembly_context(list(subsystem_ids), json_dir=json_dir, graph_path=graph_path)
     click.echo(json.dumps(ctx, indent=2))
+
+
+@cli.command("kb-update")
+@click.option("--skip-graphify", is_flag=True, help="Skip graphify update step")
+@click.option("--skip-llm", is_flag=True, help="Skip LLM fact extraction")
+def kb_update(skip_graphify, skip_llm):
+    """Full KB pipeline: export → graphify → link-entities → turbovec."""
+    import subprocess
+    import os
+    from pathlib import Path
+    from simvault.knowledge.export import run as export_run
+    from simvault.knowledge.indexer import run as index_run
+    from simvault.graph.link_entities import run as link_run
+    simscape_root = Path(__file__).parent.parent.parent
+    click.echo("→ Exporting lean-ctx atoms...")
+    export_run()
+    if not skip_llm:
+        click.echo("→ LLM fact extraction...")
+        try:
+            from simvault.knowledge.llm_extract import run as llm_run
+            n = llm_run()
+            click.echo(f"  {n} facts extracted.")
+        except Exception as e:
+            click.echo(f"  LLM skipped: {e}")
+    if not skip_graphify:
+        click.echo("→ Running graphify update...")
+        subprocess.run(
+            ["graphify", "update", "."],
+            env={**os.environ, "GRAPHIFY_VIZ_NODE_LIMIT": "20000"},
+            cwd=str(simscape_root),
+        )
+        subprocess.run(["graphify", "tree"], cwd=str(simscape_root))
+    click.echo("→ Building cross-edges...")
+    click.echo(f"  {link_run()} edges written.")
+    click.echo("→ Indexing knowledge chunks...")
+    click.echo(f"  {index_run()} new chunks embedded.")
+    click.echo("→ Regenerating visualizations...")
+    try:
+        import json
+        from simvault.viz import generate_model_graph_html, sync_kb_visuals
+        docs = Path(__file__).parent.parent / "docs"
+        docs.mkdir(exist_ok=True)
+        gpath = Path(__file__).parent.parent / "simvault.graph.json"
+        if gpath.exists():
+            html = generate_model_graph_html(json.loads(gpath.read_text()))
+            (docs / "model_graph.html").write_text(html)
+        sync_kb_visuals(docs, simscape_root / "graphify-out")
+        click.echo("  docs/ updated.")
+    except Exception as e:
+        click.echo(f"  viz skipped: {e}")
+    click.echo("✓ KB update complete.")
+
+
+@cli.command("kb-query")
+@click.argument("query")
+@click.option("--k", default=10, help="Max results")
+def kb_query_cmd(query, k):
+    """Unified KB search: semantic + BM25 + graph, fused with RRF."""
+    from simvault.retrieval.unified import UnifiedQuery
+    results = UnifiedQuery().search(query, k=k)
+    if not results:
+        click.echo("No results.")
+        return
+    for i, r in enumerate(results, 1):
+        score = r.get("effective_score", r.get("score", 0))
+        click.echo(f"\n[{i}] {score:.3f}  [{r.get('mode','?')}]  {r.get('source','')}")
+        click.echo(f"    {r.get('text','')[:200]}")
+
+
+@cli.command("kb-extract-session")
+@click.argument("session_index", type=int, required=False)
+def kb_extract_session(session_index):
+    """List sessions or extract facts from session N via LLM."""
+    from simvault.knowledge.sessions import list_sessions
+    from simvault.knowledge.llm_extract import run as llm_run
+    sessions = list_sessions()
+    if not sessions:
+        click.echo("No sessions found.")
+        return
+    if session_index is None:
+        for i, p in enumerate(sessions):
+            click.echo(f"[{i}] {p.name}  ({p.stat().st_size//1024} KB)")
+        return
+    click.echo(f"Extracting from: {sessions[session_index].name}")
+    click.echo(f"✓ {llm_run(session_path=sessions[session_index])} facts written.")
+
+
+@cli.command("viz")
+@click.option("--open", "open_browser", is_flag=True, help="Open in browser after generating")
+@click.option("--graph-path", default="simvault.graph.json", help="Model graph path")
+def viz_cmd(open_browser, graph_path):
+    """Generate HTML visualizations for model graph and KB graph."""
+    import json, os
+    from pathlib import Path
+    from simvault.viz import generate_model_graph_html, sync_kb_visuals
+    _root = Path(__file__).parent.parent
+    docs = _root / "docs"
+    docs.mkdir(exist_ok=True)
+    # Model graph
+    gpath = Path(graph_path)
+    if gpath.exists():
+        html = generate_model_graph_html(json.loads(gpath.read_text()))
+        out = docs / "model_graph.html"
+        out.write_text(html)
+        click.echo(f"✓ model_graph.html  ({gpath.stat().st_size//1024} KB graph)")
+    else:
+        click.echo(f"  model graph not found at {graph_path} — run simvault index first")
+    # KB visuals (symlinks to graphify-out)
+    n = sync_kb_visuals(docs, _root.parent / "graphify-out")
+    click.echo(f"✓ {n} KB visual(s) synced → docs/")
+    if open_browser:
+        import webbrowser
+        webbrowser.open(str(docs / "index.html"))
 
 
 if __name__ == "__main__":
